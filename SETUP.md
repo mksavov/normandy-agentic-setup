@@ -17,18 +17,21 @@ persisted to `.agentic/local.config` so re-runs offer them as defaults.
 | `{{DEFAULT_BASE_BRANCH}}` | Branch new work is cut from | `develop` |
 | `{{TICKET_SOURCE}}` | `manual` \| `github` \| `jira` | `manual` |
 | `{{ARTIFACT_DIR}}` | Where traceability artifacts are written | `.agentic/stories` |
-| `SKILLS_DIR` | Where the four project skills are installed (not a placeholder — used by the installer only) | `<workspace>/.opencode/skills` |
+| `INSTALL_ROOT` | Target project the crew is installed into (not a placeholder — used by the installer). Skills go to `<INSTALL_ROOT>/.opencode/skills`, agents/commands to `<INSTALL_ROOT>/.opencode/{agents,commands}` | `<workspace root>` |
 
 ## What `setup.sh` does
 
 1. Loads previous answers from `.agentic/local.config` (if present) as defaults.
 2. Prompts for each value.
 3. Confirms, then persists answers.
-4. Replaces every `{{PLACEHOLDER}}` in `.opencode/agents/*.md` and `.opencode/commands/*.md`.
-5. Copies the four templates from `skills/_templates/` into `SKILLS_DIR`, substituting placeholders
-   in the copies. Existing skills are **not** overwritten.
+4. **Copies** `.opencode/agents/*.md` and `.opencode/commands/*.md` into
+   `<INSTALL_ROOT>/.opencode/`, substituting every `{{PLACEHOLDER}}` **in the copies**.
+5. Copies the four templates from `skills/_templates/` into `<INSTALL_ROOT>/.opencode/skills`,
+   substituting placeholders in the copies. Existing skills are **not** overwritten.
 
-It is pure `bash` + `sed`, compatible with macOS's bash 3.2. No Node, npm, or build step.
+The **framework repo itself is never modified** — placeholders stay intact so it can be reused for
+other projects. It is pure `bash` + `sed`, compatible with macOS's bash 3.2. No Node, npm, or build
+step.
 
 ## What `setup.sh` does NOT do
 
@@ -50,5 +53,7 @@ Extra skills named `<slug>-*` (matching `{{PROJECT_SLUG}}`) are auto-loaded by e
 
 ## Re-running
 
-Safe to re-run `setup.sh` at any time. Placeholders already substituted won't match again, so only
-new/unfilled ones change. To start clean, re-clone or `git checkout` the agent files first.
+Safe to re-run `setup.sh` at any time from the framework repo. It refreshes the agents/commands in
+the target project from the latest framework version and never overwrites existing skills. Because
+the framework repo is never mutated, there's nothing to reset — just re-run and point it at the
+same (or a different) project.

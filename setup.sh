@@ -13,12 +13,6 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="$ROOT_DIR/.agentic/local.config"
 
-# Files that contain {{PLACEHOLDERS}} to substitute.
-TARGET_GLOBS=(
-  "$ROOT_DIR/.opencode/agents/"*.md
-  "$ROOT_DIR/.opencode/commands/"*.md
-)
-
 # ---- helpers ---------------------------------------------------------------
 
 # prompt VAR "Question" "default"
@@ -70,7 +64,11 @@ prompt TICKET_PREFIX       "Ticket key prefix (e.g. ACME)"            "TASK"
 prompt DEFAULT_BASE_BRANCH "Default base branch for new work"         "develop"
 prompt TICKET_SOURCE       "Ticket source (manual|github|jira)"       "manual"
 prompt ARTIFACT_DIR        "Traceability artifact directory"          ".agentic/stories"
-prompt SKILLS_DIR          "Where to install project skills"          "$WORKSPACE_ROOT/.opencode/skills"
+prompt INSTALL_ROOT        "Target project to install the crew into"  "$WORKSPACE_ROOT"
+
+# Everything installs under the target project's .opencode/ directory.
+INSTALL_OPENCODE="$INSTALL_ROOT/.opencode"
+SKILLS_DIR="$INSTALL_OPENCODE/skills"
 
 # ---- confirm ---------------------------------------------------------------
 
@@ -83,7 +81,9 @@ printf '  %-20s %s\n' TICKET_PREFIX "$TICKET_PREFIX"
 printf '  %-20s %s\n' DEFAULT_BASE_BRANCH "$DEFAULT_BASE_BRANCH"
 printf '  %-20s %s\n' TICKET_SOURCE "$TICKET_SOURCE"
 printf '  %-20s %s\n' ARTIFACT_DIR "$ARTIFACT_DIR"
-printf '  %-20s %s\n' SKILLS_DIR "$SKILLS_DIR"
+printf '  %-20s %s\n' INSTALL_ROOT "$INSTALL_ROOT"
+echo
+echo "The crew will be installed into: $INSTALL_OPENCODE/{agents,commands,skills}"
 echo
 read -r -p "Proceed? (y/N): " CONFIRM || true
 case "${CONFIRM:-}" in
@@ -102,7 +102,7 @@ TICKET_PREFIX="$TICKET_PREFIX"
 DEFAULT_BASE_BRANCH="$DEFAULT_BASE_BRANCH"
 TICKET_SOURCE="$TICKET_SOURCE"
 ARTIFACT_DIR="$ARTIFACT_DIR"
-SKILLS_DIR="$SKILLS_DIR"
+INSTALL_ROOT="$INSTALL_ROOT"
 EOF
 
 # ---- substitute placeholders ----------------------------------------------
@@ -121,12 +121,29 @@ substitute_file() {
   sed_inplace "s|{{ARTIFACT_DIR}}|$(sed_escape "$ARTIFACT_DIR")|g" "$file"
 }
 
+# ---- install crew into the target project ----------------------------------
+# The framework repo stays pristine (placeholders intact). We copy the agents,
+# commands, and skill templates into the target project's .opencode/, then
+# substitute placeholders in the COPIES only.
+
 echo
-echo "Substituting placeholders in agent + command files..."
-for file in "${TARGET_GLOBS[@]}"; do
-  [ -f "$file" ] || continue
-  substitute_file "$file"
-  echo "  updated $(basename "$file")"
+echo "Installing agents + commands into $INSTALL_OPENCODE ..."
+mkdir -p "$INSTALL_OPENCODE/agents" "$INSTALL_OPENCODE/commands"
+
+for src in "$ROOT_DIR/.opencode/agents/"*.md; do
+  [ -f "$src" ] || continue
+  dest="$INSTALL_OPENCODE/agents/$(basename "$src")"
+  cp "$src" "$dest"
+  substitute_file "$dest"
+  echo "  agent    $(basename "$src")"
+done
+
+for src in "$ROOT_DIR/.opencode/commands/"*.md; do
+  [ -f "$src" ] || continue
+  dest="$INSTALL_OPENCODE/commands/$(basename "$src")"
+  cp "$src" "$dest"
+  substitute_file "$dest"
+  echo "  command  $(basename "$src")"
 done
 
 # ---- install skill templates ----------------------------------------------
@@ -143,7 +160,6 @@ for slot in project-domain project-architecture project-test-strategy project-wo
   fi
   mkdir -p "$dest_dir"
   cp "$src" "$dest_dir/SKILL.md"
-  # substitute placeholders inside the installed template too
   substitute_file "$dest_dir/SKILL.md"
   echo "  installed $slot"
 done
@@ -152,10 +168,12 @@ done
 
 cat <<EOF
 
-Setup complete.
+Setup complete. The crew is installed in:
+  $INSTALL_OPENCODE/
 
 Next steps:
-  1. Point OpenCode at these agents/commands (see README "Install").
+  1. Open OpenCode FROM your project so it discovers the crew:
+       cd "$INSTALL_ROOT" && opencode
   2. Fill in your project knowledge. Two options:
        a. Run  /bootstrap-project   — the agents scan your codebase and ticket
           system and write the four skills for you (asking questions as needed).

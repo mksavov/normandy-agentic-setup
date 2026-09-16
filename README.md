@@ -78,39 +78,51 @@ You don't have to write these by hand — see [Bootstrap](#4-generate-your-proje
 - A POSIX shell (macOS/Linux). `setup.sh` is plain bash — no Node, no npm, no build.
 - *(Optional)* the `gh` CLI if you want GitHub-issue tickets; a Jira MCP if you want Jira.
 
-### 1. Get the framework
-```bash
-git clone <your-fork-url> agentic-dev-framework
-cd agentic-dev-framework
-```
+### The whole flow
 
-### 2. Run setup
+Say your project is `~/myproject` and you want to add the crew to it.
+
 ```bash
+# 1. Clone the framework somewhere OUTSIDE your project (it's a reusable source).
+git clone <your-fork-url> ~/agentic-dev-framework
+cd ~/agentic-dev-framework
+
+# 2. Run setup and answer the prompts.
 ./setup.sh
 ```
-It asks a handful of questions (each with a sensible default — press Enter to accept):
+
+`setup.sh` asks a handful of questions (each with a sensible default — press Enter to accept):
 
 | Prompt | Meaning | Example |
 |--------|---------|---------|
 | Project name | Human-readable | `Acme Billing` |
 | Project slug | Keyword for extra-skill discovery | `acme` |
-| Workspace root | Absolute path where your repos live | `/Users/you/acme` |
+| Workspace root | Absolute path where your repos live | `/Users/you/myproject` |
 | Ticket prefix | Ticket key prefix | `ACME` |
 | Default base branch | Branch to cut work from | `develop` |
 | Ticket source | `manual` \| `github` \| `jira` | `manual` |
 | Artifact directory | Where the paper trail is written | `.agentic/stories` |
-| Skills install dir | Where project skills are installed | `.../.opencode/skills` |
+| **Target project** | The project to install the crew into | `/Users/you/myproject` |
 
-It then **replaces every `{{PLACEHOLDER}}`** in the agents/commands and **installs the four skill
-templates** into your skills directory. Re-run any time; your previous answers become the defaults.
+It then **copies the crew into `<target-project>/.opencode/`** — agents, commands, and the four
+skill templates — with every `{{PLACEHOLDER}}` already substituted. The framework repo itself stays
+pristine (placeholders intact), so you can reuse it for other projects later.
 
-### 3. Point OpenCode at the agents
-Make the framework's `.opencode/agents/` and `.opencode/commands/` visible to OpenCode — either by
-running OpenCode from a directory that includes them, or by copying/symlinking them into your
-project's `.opencode/`. (OpenCode discovers agents, commands, and skills from `.opencode/`
-directories.)
+> **Why copy into the project?** OpenCode discovers agents/commands/skills from the `.opencode/`
+> directory of the project you open it in. Installing them there is the simplest, most reliable
+> path — and matches how OpenCode project setups normally work. (If you'd rather have the crew in
+> *every* project, copy the installed `.opencode/agents`, `.opencode/commands`, and skills into your
+> global `~/.config/opencode/` — `agent/` and `command/` singular — instead.)
+
+```bash
+# 3. Open OpenCode FROM your project so it discovers the crew.
+cd ~/myproject
+opencode
+```
 
 ### 4. Generate your project knowledge
+
+Inside OpenCode, from your project:
 
 **Option A — let the agents do it (recommended):**
 ```
@@ -121,8 +133,8 @@ template — **scanning your code and ticket system, and asking you focused ques
 the code can't reveal** (business intent, coverage targets, review process). You end up reviewing
 AI-drafted skills instead of writing them from scratch.
 
-**Option B — by hand:** open the four installed `SKILL.md` files and follow the authoring guidance
-embedded at the top of each.
+**Option B — by hand:** open the four installed `SKILL.md` files under
+`~/myproject/.opencode/skills/` and follow the authoring guidance embedded at the top of each.
 
 ### 5. Develop something
 ```
@@ -138,6 +150,10 @@ You can also run analysis only:
 ```
 /analyze <ticket-or-story>
 ```
+
+> **Re-running setup / updating the crew:** just run `./setup.sh` again from the framework repo and
+> point it at the same project. Existing skills are never overwritten; agents/commands are
+> refreshed from the latest framework version.
 
 ---
 
