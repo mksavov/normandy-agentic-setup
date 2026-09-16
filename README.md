@@ -82,12 +82,18 @@ You don't have to write these by hand — see [Bootstrap](#4-generate-your-proje
 
 Say your project is `~/myproject` and you want to add the crew to it.
 
+### 1. Clone the framework
+
+Clone it somewhere **outside** your project — it's a reusable source you can point at many projects.
+
 ```bash
-# 1. Clone the framework somewhere OUTSIDE your project (it's a reusable source).
 git clone <your-fork-url> ~/agentic-dev-framework
 cd ~/agentic-dev-framework
+```
 
-# 2. Run setup and answer the prompts.
+### 2. Run setup
+
+```bash
 ./setup.sh
 ```
 
@@ -114,8 +120,11 @@ pristine (placeholders intact), so you can reuse it for other projects later.
 > *every* project, copy the installed `.opencode/agents`, `.opencode/commands`, and skills into your
 > global `~/.config/opencode/` — `agent/` and `command/` singular — instead.)
 
+### 3. Open OpenCode from your project
+
+Run OpenCode from the project directory so it discovers the newly installed crew.
+
 ```bash
-# 3. Open OpenCode FROM your project so it discovers the crew.
 cd ~/myproject
 opencode
 ```
@@ -219,4 +228,4 @@ Nothing about the pipeline logic, roles, or project-knowledge model changes — 
 
 ## License
 
-Add your preferred license here before publishing.
+TBD
