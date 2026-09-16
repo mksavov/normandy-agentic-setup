@@ -19,13 +19,20 @@ of **project-knowledge skills** that you either write by hand or have the agents
 |-------|------|--------------|---------------|
 | **Captain** | Orchestrator | Runs the pipeline, routes between agents, escalates decisions to you | `claude-opus-4.8` |
 | **Seer** | Analyst | Vets requirements & acceptance criteria against your domain rules | `claude-opus-4.8` |
-| **Forger** | Developer | Implements the work following your conventions | `claude-sonnet-4.5` |
-| **Sentinel** | Reviewer | Reviews the diff for bugs, conventions, security | `claude-sonnet-4.5` |
+| **Forger** | Developer | Implements the work following your conventions | `claude-sonnet-5` |
+| **Sentinel** | Reviewer | Reviews the diff for bugs, conventions, security | `claude-sonnet-5` |
 | **Probe** | QA | Derives tests from the ACs, writes and runs them | `claude-haiku-4.5` |
 | **Scout** | Recon | Cheaply maps the codebase area a story touches | `claude-haiku-4.5` |
 
-Models are just defaults. Change them in each agent's frontmatter (`model:` field). The IDs shown
-use the `github-copilot/` provider prefix — adjust to your provider.
+Models are configured at setup and stored in each agent's frontmatter (`model:` field). The crew
+uses **three capability tiers** — thinking (Captain, Seer), coding (Forger, Sentinel), and cheap
+(Probe, Scout) — and `setup.sh` prompts for all three plus a provider prefix, so you can point them
+at whatever is valid on your provider. Defaults target `github-copilot`.
+
+> **⚠️ Verify the model IDs before your first run.** Provider catalogs change: an agent whose
+> `model:` doesn't resolve will error at runtime (e.g. `Model not found: …`) and degrade the
+> pipeline. `setup.sh` lets you set them; to change later, re-run setup or edit
+> `.opencode/agents/*.md`. This is the #1 setup gotcha.
 
 ---
 
@@ -109,6 +116,8 @@ cd ~/agentic-dev-framework
 | Ticket source | `manual` \| `github` \| `jira` | `manual` |
 | Artifact directory | Where the paper trail is written | `.agentic/stories` |
 | **Target project** | The project to install the crew into | `/Users/you/myproject` |
+| Provider prefix | Model provider (`-` for none) | `github-copilot` |
+| Thinking / Coding / Cheap models | The three model tiers | `claude-opus-4.8` / `claude-sonnet-5` / `claude-haiku-4.5` |
 
 It then **copies the crew into `<target-project>/.opencode/`** — agents, commands, and the four
 skill templates — with every `{{PLACEHOLDER}}` already substituted. The framework repo itself stays

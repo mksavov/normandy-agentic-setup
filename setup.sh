@@ -66,6 +66,27 @@ prompt TICKET_SOURCE       "Ticket source (manual|github|jira)"       "manual"
 prompt ARTIFACT_DIR        "Traceability artifact directory"          ".agentic/stories"
 prompt INSTALL_ROOT        "Target project to install the crew into"  "$WORKSPACE_ROOT"
 
+echo
+echo "-- Models -------------------------------------------------------------"
+echo "The crew uses three capability tiers. Enter model IDs valid on YOUR provider."
+echo "Defaults target the github-copilot provider; verify them before your first run."
+echo
+prompt MODEL_PROVIDER "Provider prefix ('-' for none)"             "github-copilot"
+prompt MODEL_THINKING "Thinking tier  (Captain, Seer)"             "claude-opus-4.8"
+prompt MODEL_CODING   "Coding tier    (Forger, Sentinel)"          "claude-sonnet-5"
+prompt MODEL_CHEAP    "Cheap tier     (Probe, Scout)"              "claude-haiku-4.5"
+
+# Compose full model IDs (provider/model, or bare model if provider is '-' / empty).
+if [ -n "$MODEL_PROVIDER" ] && [ "$MODEL_PROVIDER" != "-" ]; then
+  MODEL_THINKING_FULL="$MODEL_PROVIDER/$MODEL_THINKING"
+  MODEL_CODING_FULL="$MODEL_PROVIDER/$MODEL_CODING"
+  MODEL_CHEAP_FULL="$MODEL_PROVIDER/$MODEL_CHEAP"
+else
+  MODEL_THINKING_FULL="$MODEL_THINKING"
+  MODEL_CODING_FULL="$MODEL_CODING"
+  MODEL_CHEAP_FULL="$MODEL_CHEAP"
+fi
+
 # Everything installs under the target project's .opencode/ directory.
 INSTALL_OPENCODE="$INSTALL_ROOT/.opencode"
 SKILLS_DIR="$INSTALL_OPENCODE/skills"
@@ -82,6 +103,9 @@ printf '  %-20s %s\n' DEFAULT_BASE_BRANCH "$DEFAULT_BASE_BRANCH"
 printf '  %-20s %s\n' TICKET_SOURCE "$TICKET_SOURCE"
 printf '  %-20s %s\n' ARTIFACT_DIR "$ARTIFACT_DIR"
 printf '  %-20s %s\n' INSTALL_ROOT "$INSTALL_ROOT"
+printf '  %-20s %s\n' 'MODEL thinking' "$MODEL_THINKING_FULL"
+printf '  %-20s %s\n' 'MODEL coding' "$MODEL_CODING_FULL"
+printf '  %-20s %s\n' 'MODEL cheap' "$MODEL_CHEAP_FULL"
 echo
 echo "The crew will be installed into: $INSTALL_OPENCODE/{agents,commands,skills}"
 echo
@@ -103,6 +127,10 @@ DEFAULT_BASE_BRANCH="$DEFAULT_BASE_BRANCH"
 TICKET_SOURCE="$TICKET_SOURCE"
 ARTIFACT_DIR="$ARTIFACT_DIR"
 INSTALL_ROOT="$INSTALL_ROOT"
+MODEL_PROVIDER="$MODEL_PROVIDER"
+MODEL_THINKING="$MODEL_THINKING"
+MODEL_CODING="$MODEL_CODING"
+MODEL_CHEAP="$MODEL_CHEAP"
 EOF
 
 # ---- substitute placeholders ----------------------------------------------
@@ -119,6 +147,9 @@ substitute_file() {
   sed_inplace "s|{{DEFAULT_BASE_BRANCH}}|$(sed_escape "$DEFAULT_BASE_BRANCH")|g" "$file"
   sed_inplace "s|{{TICKET_SOURCE}}|$(sed_escape "$TICKET_SOURCE")|g" "$file"
   sed_inplace "s|{{ARTIFACT_DIR}}|$(sed_escape "$ARTIFACT_DIR")|g" "$file"
+  sed_inplace "s|{{MODEL_THINKING}}|$(sed_escape "$MODEL_THINKING_FULL")|g" "$file"
+  sed_inplace "s|{{MODEL_CODING}}|$(sed_escape "$MODEL_CODING_FULL")|g" "$file"
+  sed_inplace "s|{{MODEL_CHEAP}}|$(sed_escape "$MODEL_CHEAP_FULL")|g" "$file"
 }
 
 # ---- install crew into the target project ----------------------------------
@@ -180,5 +211,8 @@ Next steps:
        b. Or edit the templates in $SKILLS_DIR by hand.
   3. Kick off work with  /develop <ticket-or-story>.
 
+  Models: verify the three tier IDs above resolve on your provider. If an agent
+  errors with "Model not found", re-run setup with corrected IDs, or edit the
+  model: field in $INSTALL_OPENCODE/agents/*.md.
   If TICKET_SOURCE=jira, configure a Jira MCP (see README). manual/github need none.
 EOF

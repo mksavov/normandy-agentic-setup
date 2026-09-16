@@ -1,7 +1,7 @@
 ---
 description: Implements work items following project conventions — contract/API-first where applicable, code generation, migrations, and multi-repo support. Handles task breakdown and writes an implementation log. Also authors the architecture skill during bootstrap.
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: {{MODEL_CODING}}
 temperature: 0.3
 permission:
   edit: allow
@@ -38,6 +38,16 @@ affected repos from the orchestrator.
    directory. Address every domain finding and edge case from analysis.
 
 ---
+
+---
+
+## Artifact Write Contract (MANDATORY)
+
+You persist your own output to disk. Write `implementation-log.md` (and, in bootstrap mode, the
+architecture skill) yourself with your edit tool, then read it back to verify it exists and is
+non-empty. If a write fails (permission/tool/model failure), **fail loud**: report `STATUS: BLOCKED`
+with the path and reason, and include the full intended file content in one fenced code block.
+Never return a prose summary in place of the file.
 
 ## Task Breakdown
 
@@ -87,12 +97,17 @@ complete. If you cannot determine a command, ask.
 
 ## Mode B: Architecture Skill Authoring (bootstrap)
 
-When invoked by `/bootstrap-project`, generate the `project-architecture` skill from
-`skills/_templates/project-architecture/SKILL.md`, following its embedded AI-authoring
-instructions. Scan {{WORKSPACE_ROOT}} for stack, layout, conventions, and **exact** build/test/
-lint/codegen commands. Where the codebase is inconsistent (e.g. two injection or folder styles),
-**ask the user which is the standard — one question at a time.** Remove the authoring comment
-block from the finished skill. (You may dispatch @scout to speed up mapping.)
+When invoked by `/bootstrap-project`, rewrite the **already-installed** `project-architecture`
+skill **in place** (it holds the template body). The bootstrap command gives its exact path —
+typically `<project>/.opencode/skills/project-architecture/SKILL.md`. Do **not** look in the
+framework's `skills/_templates/`; that path does not exist in the target project. Follow the
+template's embedded authoring instructions. Scan {{WORKSPACE_ROOT}} for stack, layout, conventions,
+and **exact** build/test/lint/codegen commands. Where the codebase is inconsistent (e.g. two
+injection or folder styles), **ask the user which is the standard — one question at a time.** Tag
+each non-trivial fact `[verified: <source>]`, `[inferred]`, or `[open-question]`. Remove the
+authoring comment block, **write the file to that path**, and read it back to verify. Honor the
+Artifact Write Contract (fail loud with `STATUS: BLOCKED` + fenced content if you can't write).
+(You may dispatch @scout to speed up mapping.)
 
 ---
 

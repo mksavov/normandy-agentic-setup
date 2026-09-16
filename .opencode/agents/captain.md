@@ -1,7 +1,7 @@
 ---
 description: Orchestrates end-to-end story development through specialized subagents — recon, analysis, implementation, review, and QA — with full traceability. Project-agnostic; driven by project-knowledge skills.
 mode: primary
-model: github-copilot/claude-opus-4.8
+model: {{MODEL_THINKING}}
 temperature: 0.2
 permission:
   edit: allow
@@ -125,8 +125,22 @@ Route on the token, not on prose:
 - Seer → `PASS` | `PASS_WITH_NOTES` | `NEEDS_REVISION`
 - Sentinel → `APPROVED` | `APPROVED_WITH_NOTES` | `CHANGES_REQUESTED` | `BLOCKING`
 - Probe → `PASS` | `PARTIAL` | `FAIL`
+- **Any agent → `BLOCKED`** — it could not persist its artifact (see below).
 
 Always read the artifact and confirm the token before deciding the next phase.
+
+## Handling `BLOCKED` (agent could not write its file)
+
+Subagents are required to write their own artifacts and **fail loud** if they can't — returning
+`STATUS: BLOCKED`, the target path, the reason, and their full intended content in a fenced block.
+When you receive `BLOCKED`:
+1. **Persist the returned content yourself** to the stated path (you have edit permission).
+2. If no content was returned, **re-dispatch** the agent once with an explicit instruction to
+   return the full file content in a fenced block.
+3. If it still fails, **escalate** via `question` — never silently drop the artifact or fabricate
+   it. Note the degradation in `summary.md`.
+
+Do not treat a prose summary as a substitute for a written artifact.
 
 ---
 
@@ -135,9 +149,12 @@ Always read the artifact and confirm the token before deciding the next phase.
 Run phases **sequentially**. Each phase produces its artifact.
 
 ### Phase 0 — Recon (@scout)
-Dispatch Scout to map the area the story touches. Give it the story text and workspace root.
-Scout writes `context.md`: relevant files, existing patterns, entry points, and any ambiguities.
-This gives every later agent a warm start.
+**First, seed the handoff file yourself:** create the traceability directory and write an initial
+`context.md` (ticket id, story one-liner, workspace root, the repos you suspect are involved). This
+guarantees every downstream agent has a warm start even if Scout's model or tools fail.
+Then dispatch Scout to enrich it: give it the story text and workspace root. Scout appends its map
+(relevant files, existing patterns, entry points, ambiguities). If Scout returns `BLOCKED`, persist
+its returned notes into `context.md` yourself before proceeding.
 
 ### Phase 1 — Setup (you)
 1. Create `{{ARTIFACT_DIR}}/{{TICKET_PREFIX}}-{id}/`.

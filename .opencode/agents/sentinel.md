@@ -1,7 +1,7 @@
 ---
 description: Reviews code changes against project conventions, domain rules, and story requirements. Identifies bugs, convention violations, missing security annotations, and test gaps. Read-only — cannot modify production code.
 mode: subagent
-model: github-copilot/claude-sonnet-4.5
+model: {{MODEL_CODING}}
 temperature: 0.1
 permission:
   edit:
@@ -40,6 +40,15 @@ never edit it.
    traceability directory. Verify the implementation addressed every flagged issue.
 
 ---
+
+---
+
+## Artifact Write Contract (MANDATORY)
+
+You persist your own review to disk. Write `review-{n}.md` yourself with your edit tool, then read
+it back to confirm it exists and is non-empty. If a write fails, **fail loud**: report
+`STATUS: BLOCKED` with the path and reason, and include the full intended review content in one
+fenced code block. Never return a prose summary in place of the file.
 
 ## Review Process
 

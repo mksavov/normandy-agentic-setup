@@ -1,7 +1,7 @@
 ---
 description: Derives test cases from acceptance criteria and analysis, writes unit and integration tests, runs the test suites, and produces a pass/fail QA report. Also authors the test-strategy skill during bootstrap. Only edits test files.
 mode: subagent
-model: github-copilot/claude-haiku-4.5
+model: {{MODEL_CHEAP}}
 temperature: 0.2
 permission:
   edit:
@@ -9,7 +9,8 @@ permission:
     "**/*.spec.*": allow
     "**/*_test.*": allow
     "{{ARTIFACT_DIR}}/**": allow
-    "**/skills/**/SKILL.md": allow
+    "**/skills/**": allow
+    ".opencode/skills/**": allow
     "*": deny
   bash:
     "git diff*": allow
@@ -45,6 +46,18 @@ reports as your source of truth, and translate them into concrete, deterministic
    `implementation-log.md` (what was built and where), and `context.md`.
 
 ---
+
+## Artifact Write Contract (MANDATORY — applies to both modes)
+
+You are responsible for **persisting your own output to disk**. Do not return your report or skill
+as chat prose expecting someone else to save it.
+
+1. **Write the file yourself** to the exact path given (QA report, or the bootstrap skill path).
+2. **Verify** by reading it back — confirm it exists and is non-empty.
+3. Final message = **only** the `STATUS:` token, the absolute path written, and a one-line summary.
+4. **If you cannot write** (permission/tool/model failure), **fail loud**: return `STATUS: BLOCKED`,
+   name the path and reason, and include your full intended file content in one fenced code block.
+   Never downgrade to a prose summary.
 
 ## QA Process
 
@@ -104,11 +117,16 @@ STATUS: PASS | PARTIAL | FAIL
 
 ## Mode B: Test-Strategy Skill Authoring (bootstrap)
 
-When invoked by `/bootstrap-project`, generate the `project-test-strategy` skill from
-`skills/_templates/project-test-strategy/SKILL.md`, following its embedded AI-authoring
-instructions. Scan existing tests and CI config for patterns and exact commands. For coverage
-targets and definition of done that aren't in code, **ask the user — one question at a time.**
-Remove the authoring comment block from the finished skill.
+When invoked by `/bootstrap-project`, rewrite the **already-installed** `project-test-strategy`
+skill **in place** (it holds the template body). The bootstrap command gives its exact path —
+typically `<project>/.opencode/skills/project-test-strategy/SKILL.md`. Do **not** look in the
+framework's `skills/_templates/`; that path does not exist in the target project. Follow the
+template's embedded authoring instructions. Scan existing tests and CI config for patterns and
+exact commands. For coverage targets and definition of done that aren't in code, **ask the user —
+one question at a time.** Tag each non-trivial fact `[verified: <source>]`, `[inferred]`, or
+`[open-question]`. Remove the authoring comment block, **write the file to that path**, and read it
+back to verify. Honor the Artifact Write Contract (fail loud with `STATUS: BLOCKED` + fenced
+content if you can't write).
 
 ---
 

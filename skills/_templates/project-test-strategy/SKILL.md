@@ -17,6 +17,10 @@ HOW TO POPULATE THIS FILE:
 4. For things not in code — coverage TARGET, definition of done, what "must have a
    test" means for this team — ASK THE USER. One question at a time.
 
+CONFIDENCE TAGGING: tag each non-trivial fact you write as [verified: <source-file-or-command>]
+when you traced it to real code/config, or [inferred] / [open-question] when it needs the
+user to confirm. This lets a reviewer instantly separate code-backed facts from assumptions.
+
 DONE WHEN: the QA agent can derive a test matrix from acceptance criteria and write
 tests that match existing style, and the reviewer can judge test quality, from this
 file alone.

@@ -22,6 +22,10 @@ HOW TO POPULATE THIS FILE:
    patterns), ASK THE USER which is the standard — one question at a time.
 3. Record EXACT build/test/lint/codegen COMMANDS. Downstream agents run these verbatim.
 
+CONFIDENCE TAGGING: tag each non-trivial fact you write as [verified: <source-file-or-command>]
+when you traced it to real code/config, or [inferred] / [open-question] when it needs the
+user to confirm. This lets a reviewer instantly separate code-backed facts from assumptions.
+
 DONE WHEN: a developer agent could add a new endpoint/component and a reviewer agent
 could flag convention violations using only this file.
 ===================================================================== -->

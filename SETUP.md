@@ -17,6 +17,10 @@ persisted to `.agentic/local.config` so re-runs offer them as defaults.
 | `{{DEFAULT_BASE_BRANCH}}` | Branch new work is cut from | `develop` |
 | `{{TICKET_SOURCE}}` | `manual` \| `github` \| `jira` | `manual` |
 | `{{ARTIFACT_DIR}}` | Where traceability artifacts are written | `.agentic/stories` |
+| `MODEL_PROVIDER` | Provider prefix for all model IDs (`-` = no prefix) | `github-copilot` |
+| `{{MODEL_THINKING}}` | Model for Captain + Seer (composed as `provider/model`) | `claude-opus-4.8` |
+| `{{MODEL_CODING}}` | Model for Forger + Sentinel | `claude-sonnet-5` |
+| `{{MODEL_CHEAP}}` | Model for Probe + Scout | `claude-haiku-4.5` |
 | `INSTALL_ROOT` | Target project the crew is installed into (not a placeholder — used by the installer). Skills go to `<INSTALL_ROOT>/.opencode/skills`, agents/commands to `<INSTALL_ROOT>/.opencode/{agents,commands}` | `<workspace root>` |
 
 ## What `setup.sh` does

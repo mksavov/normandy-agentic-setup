@@ -18,6 +18,10 @@ HOW TO POPULATE THIS FILE:
 3. For process not written down anywhere — review requirements, who approves, release
    branching — ASK THE USER. One question at a time.
 
+CONFIDENCE TAGGING: tag each non-trivial fact you write as [verified: <source-file-or-command>]
+when you traced it to real code/config, or [inferred] / [open-question] when it needs the
+user to confirm. This lets a reviewer instantly separate code-backed facts from assumptions.
+
 DONE WHEN: the orchestrator can resolve a ticket, name and cut a branch correctly, and
 tell the user exactly what CI/PR steps remain.
 ===================================================================== -->

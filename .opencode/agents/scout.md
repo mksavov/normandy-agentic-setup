@@ -1,7 +1,7 @@
 ---
 description: Fast, low-cost codebase reconnaissance — finds relevant files, maps existing patterns and entry points, and summarizes the area a work item touches. Also assists skill authoring during bootstrap. Read-only; writes only recon notes.
 mode: subagent
-model: github-copilot/claude-haiku-4.5
+model: {{MODEL_CHEAP}}
 temperature: 0.1
 permission:
   edit:
@@ -34,6 +34,14 @@ You do **not** design, implement, or judge — you find and summarize.
    just need a quick file map). Load any skill referencing the slug `{{PROJECT_SLUG}}` if it helps
    locate things.
 2. Read the story text / task you were given.
+
+## Artifact Write Contract (MANDATORY)
+
+You persist your recon to disk yourself. Write/append `context.md` in the artifact directory with
+your edit tool, then read it back to confirm it exists and is non-empty. If you cannot write,
+**fail loud**: report `STATUS: BLOCKED` with the path and reason, and include your full intended
+notes in one fenced code block so the orchestrator can persist them. Never return a bare prose
+summary in place of the file.
 
 ## Recon Process
 

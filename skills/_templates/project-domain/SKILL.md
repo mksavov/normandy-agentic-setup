@@ -23,6 +23,10 @@ HOW TO POPULATE THIS FILE:
 4. Prefer tables and explicit lists. A downstream agent must be able to answer
    "is transition A→C allowed?" from this file alone.
 
+CONFIDENCE TAGGING: tag each non-trivial fact you write as [verified: <source-file-or-command>]
+when you traced it to real code/config, or [inferred] / [open-question] when it needs the
+user to confirm. This lets a reviewer instantly separate code-backed facts from assumptions.
+
 DONE WHEN: another agent could implement or review a feature correctly using only
 this file for domain truth, with no access to your reasoning.
 ===================================================================== -->
