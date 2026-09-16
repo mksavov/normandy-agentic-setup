@@ -1,4 +1,4 @@
-# Agentic Development Framework
+# Normandy Agentic Development Framework
 
 A **plug-and-play, multi-agent pipeline** that takes a work item (a ticket or a pasted story) and
 carries it through **recon → analysis → implementation → review → QA**, producing working code on
