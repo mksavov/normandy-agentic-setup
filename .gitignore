@@ -1,0 +1,11 @@
+# Generated traceability artifacts (per-project; adopters may relocate via {{ARTIFACT_DIR}})
+.agentic/stories/
+.opencode/stories/
+
+# Node / tooling
+node_modules/
+*.log
+.DS_Store
+
+# Local, non-committed config produced by setup.sh
+.agentic/local.config
